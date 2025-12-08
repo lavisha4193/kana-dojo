@@ -38,8 +38,6 @@ export default function TimedChallengeKanji() {
     // Normal mode: show kanji, answer is meaning
     renderQuestion: (question, isReverse) =>
       isReverse ? question.meanings[0] : question.kanjiChar,
-    getAudioText: (question, isReverse) =>
-      isReverse ? '' : question.kanjiChar,
     inputPlaceholder: 'Type the meaning...',
     modeDescription: 'Mode: Type (See kanji → Type meaning)',
     checkAnswer: (question, answer, isReverse) => {

@@ -11,6 +11,7 @@ import KanjiCards from '@/features/Kanji/components';
 import { usePathname } from 'next/navigation';
 import VocabCards from '@/features/Vocabulary/components';
 import { removeLocaleFromPath } from '@/shared/lib/pathUtils';
+import SelectionStatusBar from '@/shared/components/Menu/SelectionStatusBar';
 
 const DojoMenu = () => {
   const pathname = usePathname();
@@ -37,6 +38,7 @@ const DojoMenu = () => {
           <div className='flex flex-col gap-3'>
             <Info />
             <KanaCards />
+            <SelectionStatusBar />
           </div>
         ) : pathWithoutLocale === '/kanji' ? (
           <div className='flex flex-col gap-3'>

@@ -19,9 +19,19 @@ export default function TimedChallengeKana() {
     [kanaGroupIndices]
   );
 
-  // Convert indices to group names for display
+  // Convert indices to group names for display (e.g., "か-group")
   const selectedKanaGroups = React.useMemo(
-    () => kanaGroupIndices.map(i => kana[i]?.groupName || `Group ${i + 1}`),
+    () =>
+      kanaGroupIndices.map(i => {
+        const group = kana[i];
+        if (!group) return `Group ${i + 1}`;
+        // Use the first kana character of the group
+        const firstKana = group.kana[0];
+        const isChallenge = group.groupName.startsWith('challenge.');
+        return isChallenge
+          ? `${firstKana}-group (challenge)`
+          : `${firstKana}-group`;
+      }),
     [kanaGroupIndices]
   );
 
@@ -47,7 +57,6 @@ export default function TimedChallengeKana() {
     // Normal mode: show kana, answer is romaji
     renderQuestion: (question, isReverse) =>
       isReverse ? question.romaji : question.kana,
-    getAudioText: (question, isReverse) => (isReverse ? '' : question.kana),
     inputPlaceholder: 'Type the romaji...',
     modeDescription: 'Mode: Type (See kana → Type romaji)',
     checkAnswer: (question, answer, isReverse) => {

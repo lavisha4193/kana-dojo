@@ -21,7 +21,6 @@ import {
 import { Link } from '@/core/i18n/routing';
 import clsx from 'clsx';
 import confetti from 'canvas-confetti';
-import SSRAudioButton from '@/shared/components/SSRAudioButton';
 import GoalTimersPanel from '@/shared/components/Timer/GoalTimersPanel';
 import { ActionButton } from '@/shared/components/ui/ActionButton';
 import { buttonBorderStyles } from '@/shared/lib/styles';
@@ -42,7 +41,6 @@ export interface TimedChallengeConfig<T> {
 
   // Display
   renderQuestion: (question: T, isReverse?: boolean) => React.ReactNode;
-  getAudioText: (question: T, isReverse?: boolean) => string;
   inputPlaceholder: string;
   modeDescription: string;
 
@@ -97,7 +95,6 @@ export default function TimedChallenge<T>({ config }: TimedChallengeProps<T>) {
     selectedSets,
     generateQuestion,
     renderQuestion,
-    getAudioText,
     inputPlaceholder,
     checkAnswer,
     getCorrectAnswer,
@@ -883,14 +880,6 @@ export default function TimedChallenge<T>({ config }: TimedChallengeProps<T>) {
               {currentQuestion &&
                 renderQuestion(currentQuestion, isReverseActive)}
             </div>
-            {currentQuestion && !isReverseActive && (
-              <SSRAudioButton
-                text={getAudioText(currentQuestion, isReverseActive)}
-                variant='icon-only'
-                size='lg'
-                className='bg-[var(--card-color)] border-[var(--border-color)]'
-              />
-            )}
           </div>
 
           {/* Feedback - fixed height to prevent layout shift */}

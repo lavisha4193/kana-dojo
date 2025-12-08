@@ -40,7 +40,6 @@ export default function TimedChallengeVocab() {
       ) : (
         <FuriganaText text={question.word} reading={question.reading} />
       ),
-    getAudioText: (question, isReverse) => (isReverse ? '' : question.word),
     inputPlaceholder: 'Type the meaning...',
     modeDescription: 'Mode: Type (See Japanese word → Type meaning)',
     checkAnswer: (question, answer, isReverse) => {

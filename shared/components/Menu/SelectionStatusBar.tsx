@@ -1,8 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import clsx from 'clsx';
 import useKanjiStore from '@/features/Kanji/store/useKanjiStore';
 import useVocabStore from '@/features/Vocabulary/store/useVocabStore';
+import useKanaStore from '@/features/Kana/store/useKanaStore';
+import { kana } from '@/features/Kana/data/kana';
 import { usePathname } from 'next/navigation';
 import { removeLocaleFromPath } from '@/shared/lib/pathUtils';
 import { useClick } from '@/shared/hooks/useAudio';
@@ -10,7 +12,7 @@ import { CircleCheck, Trash } from 'lucide-react';
 import { ActionButton } from '@/shared/components/ui/ActionButton';
 import { AnimatePresence, motion } from 'framer-motion';
 
-type ContentType = 'kanji' | 'vocabulary';
+type ContentType = 'kana' | 'kanji' | 'vocabulary';
 
 const SelectionStatusBar = () => {
   const { playClick } = useClick();
@@ -18,7 +20,12 @@ const SelectionStatusBar = () => {
   const pathWithoutLocale = removeLocaleFromPath(pathname);
   const contentType = pathWithoutLocale.slice(1) as ContentType;
 
+  const isKana = contentType === 'kana';
   const isKanji = contentType === 'kanji';
+
+  // Kana store
+  const kanaGroupIndices = useKanaStore(state => state.kanaGroupIndices);
+  const addKanaGroupIndices = useKanaStore(state => state.addKanaGroupIndices);
 
   // Kanji store
   const { selectedKanjiSets, clearKanjiObjs, clearKanjiSets } = useKanjiStore();
@@ -26,13 +33,33 @@ const SelectionStatusBar = () => {
   // Vocab store
   const { selectedVocabSets, clearVocabObjs, clearVocabSets } = useVocabStore();
 
-  const selectedSets = isKanji ? selectedKanjiSets : selectedVocabSets;
+  // Convert kana indices to display names (e.g., "か-group", "さ-group (challenge)")
+  const kanaGroupNames = useMemo(
+    () =>
+      kanaGroupIndices.map(i => {
+        const group = kana[i];
+        if (!group) return `Group ${i + 1}`;
+        const firstKana = group.kana[0];
+        const isChallenge = group.groupName.startsWith('challenge.');
+        return isChallenge
+          ? `${firstKana}-group (challenge)`
+          : `${firstKana}-group`;
+      }),
+    [kanaGroupIndices]
+  );
 
-  const hasSelection = selectedSets.length > 0;
+  const hasSelection = isKana
+    ? kanaGroupIndices.length > 0
+    : isKanji
+    ? selectedKanjiSets.length > 0
+    : selectedVocabSets.length > 0;
 
   const handleClear = () => {
     playClick();
-    if (isKanji) {
+    if (isKana) {
+      // Clear all kana by toggling all currently selected indices
+      addKanaGroupIndices(kanaGroupIndices);
+    } else if (isKanji) {
       clearKanjiSets();
       clearKanjiObjs();
     } else {
@@ -99,6 +126,8 @@ const SelectionStatusBar = () => {
     };
   }, []);
 
+  // For kanji/vocab: sort by set number
+  const selectedSets = isKanji ? selectedKanjiSets : selectedVocabSets;
   const sortedSets =
     selectedSets.length > 0
       ? selectedSets.sort((a, b) => {
@@ -108,17 +137,26 @@ const SelectionStatusBar = () => {
         })
       : [];
 
-  // Compact: "1, 2, 3"
-  const formattedSelectionCompact =
-    sortedSets.length > 0
-      ? sortedSets.map(set => set.replace('Set ', '')).join(', ')
-      : 'None';
+  // Compact: "1, 2, 3" for kanji/vocab, or "あ, か, さ" for kana
+  const formattedSelectionCompact = isKana
+    ? kanaGroupNames.length > 0
+      ? kanaGroupNames.join(', ')
+      : 'None'
+    : sortedSets.length > 0
+    ? sortedSets.map(set => set.replace('Set ', '')).join(', ')
+    : 'None';
 
-  // Full: "Level 1, Level 2, Level 3"
-  const formattedSelectionFull =
-    sortedSets.length > 0
-      ? sortedSets.map(set => set.replace('Set ', 'Level ')).join(', ')
-      : 'None';
+  // Full: "Level 1, Level 2, Level 3" for kanji/vocab, same as compact for kana
+  const formattedSelectionFull = isKana
+    ? kanaGroupNames.length > 0
+      ? kanaGroupNames.join(', ')
+      : 'None'
+    : sortedSets.length > 0
+    ? sortedSets.map(set => set.replace('Set ', 'Level ')).join(', ')
+    : 'None';
+
+  // Label text
+  const selectionLabel = isKana ? 'Selected Groups:' : 'Selected Levels:';
 
   return (
     <AnimatePresence>
@@ -159,7 +197,7 @@ const SelectionStatusBar = () => {
                 size={20}
               />
               <span className='text-sm md:text-base whitespace-nowrap'>
-                Selected Levels:
+                {selectionLabel}
               </span>
               {/* Compact form on small screens: "1, 2, 3" */}
               <span className='text-[var(--secondary-color)] text-sm break-words md:hidden'>
