@@ -212,8 +212,8 @@ const QuickSelectModal = ({
                     layoutId={set.id}
                     transition={{
                       type: 'spring',
-                      stiffness: 500,
-                      damping: 35,
+                      stiffness: 450,
+                      damping: 30,
                       mass: 1
                     }}
                     className={clsx(isSelected ? 'order-first' : '')}
