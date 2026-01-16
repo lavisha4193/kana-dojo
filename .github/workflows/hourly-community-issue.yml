@@ -2,7 +2,7 @@ name: Create Community Contribution Issue
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -426,6 +426,25 @@ jobs:
                   merge_method: 'squash'
                 });
                 console.log('Merged automation PR #' + prNumber);
+
+                try {
+                  const { data: pr } = await github.rest.pulls.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: prNumber
+                  });
+                  const ref = pr && pr.head && pr.head.ref;
+                  if (ref) {
+                    await github.rest.git.deleteRef({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: 'heads/' + ref
+                    });
+                    console.log('Deleted automation branch: ' + ref);
+                  }
+                } catch (deleteErr) {
+                  console.log('Could not delete automation branch: ' + deleteErr.message);
+                }
                 return;
               } catch (e) {
                 console.log('Merge attempt ' + i + ' failed: ' + e.message);

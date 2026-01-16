@@ -83,6 +83,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download lint results
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          name: lint-results
+          path: .
+
+      - name: Download typecheck results
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          name: typecheck-results
+          path: .
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
