@@ -329,6 +329,12 @@ const baseThemeSets: BaseThemeGroup[] = [
     isLight: false,
     themes: [
 		{
+		  id: 'fuji-shadow',
+		  backgroundColor: 'oklch(15.0% 0.015 250.0 / 1)',
+		  mainColor: 'oklch(78.0% 0.035 230.0 / 1)',
+		  secondaryColor: 'oklch(65.0% 0.105 300.0 / 1)'
+		},
+		{
 		  id: 'shrine-stone',
 		  backgroundColor: 'oklch(19.0% 0.015 260.0 / 1)',
 		  mainColor: 'oklch(72.0% 0.155 35.0 / 1)',
